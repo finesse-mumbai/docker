@@ -43,9 +43,9 @@ jobs:
       - name: Deploy to Lightsail via SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}       # Public IPv4
-          username: ${{ secrets.LIGHTSAIL_USER }}   # usually 'ubuntu'
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}     # full PEM key with LF line endings
+          host: ${{ secrets.LIGHTSAIL_HOST }}       
+          username: ${{ secrets.LIGHTSAIL_USER }}   
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}    
           script: |
             echo "Stopping old container (if exists)..."
             docker stop node_app || true

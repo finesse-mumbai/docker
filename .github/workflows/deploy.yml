@@ -39,7 +39,6 @@ jobs:
         env:
           LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
 
-      # 6️⃣ Deploy via SSH to Lightsail
       - name: Deploy to Lightsail via SSH
         uses: appleboy/ssh-action@v1.1.0
         with:

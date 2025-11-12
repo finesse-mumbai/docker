@@ -1,22 +1,67 @@
-name: CI
-on: [push, pull_request]
+name: 🚀 Deploy to Lightsail
+
+on:
+  push:
+    branches:
+      - main  # 👈 change this if your default branch is something else (like "master" or "production")
+
 jobs:
-  test:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: ⚙️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          node-version: 20
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Install deps
-        run: npm ci
+      - name: 🏗️ Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+          platforms: linux/amd64
 
-      - name: Run lint
-        run: npm run lint
+      - name: 🧩 Debug info
+        run: |
+          echo "✅ Workflow triggered on branch: ${{ github.ref }}"
+          echo "✅ Image tag: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest"
 
-      - name: Run tests
-        run: npm test
+      - name: 🚀 Deploy to Lightsail via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            echo "📦 Pulling latest Docker image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+
+            echo "🛑 Stopping old container if exists..."
+            docker stop node_app || true
+            docker rm node_app || true
+
+            echo "🚀 Starting new container..."
+            docker run -d --restart=always \
+              --name node_app \
+              -p 3000:3000 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+              -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+              -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
+              -e SMTP_HOST="${{ secrets.SMTP_HOST }}" \
+              -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+              -e SMTP_USER="${{ secrets.SMTP_USER }}" \
+              -e SMTP_PASS="${{ secrets.SMTP_PASS }}" \
+              ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+
+            echo "✅ Deployment completed successfully!"

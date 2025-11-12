@@ -33,41 +33,19 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
 
-      # 5️⃣ Deploy via SSH to Lightsail
+      # 5️⃣ Optional: debug SSH key format
+      - name: Debug SSH key format
+        run: echo "${LIGHTSAIL_SSH_KEY}" | head -n 5
+        env:
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+      # 6️⃣ Deploy via SSH to Lightsail
       - name: Deploy to Lightsail via SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}       # Public IPv4 of Lightsail
+          host: ${{ secrets.LIGHTSAIL_HOST }}       # Public IPv4
           username: ${{ secrets.LIGHTSAIL_USER }}   # usually 'ubuntu'
-          key: |
-            -----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEAwqKpPR6XyT2KEA5Qsq/4YcVjxK81DbRID+joc3fAOciClJYV
-+udslacz5LRCMtgUX7/XvpThDem62U2eYn9oQhc0iUT2xhSGaRTLmRpJvVo+M6ks
-3B2vRpYzuMEXcidz4oDA2G4reAq+Alm3+vvcmtA76Zm0AQRXuN+bSyEFLzyrwZHk
-Dvxs7aWhRX3RlS/iYqOnJubKZZ5pieXl1XAb18rW8MISRO/hbEFpysv69emWS2Py
-gn8EXX9VhD7eNfbvS3NvRN/6T59MK3vTd3fjoIXXH50iKrmLkO7o0AT5XOu9GuRB
-dZFY/BWQrg4qK7NhPyen1QBmOahKoUgEwliVyQIDAQABAoIBACNoF8VolVAkg8Mb
-944p+NNAZz/WZ55Ql3NdeTvYIv3f/fEtxF3aT6SBwCzwpcI+EKbCbWrcBnzTcgwp
-1JAygTLUqdf21bV+8lyXTdpSL+vkSMB5HBIGzGXY2RvY9HzttGUV6v70O7AgtCQV
-UiS0QJNhIiUCsv4kXhjhhIyMOzc2To9JEKuJURSA+yEAlIGbc4jUmwpd9AW3ErAI
-8HmlymVMmyOOec8HzyAJpSUD4nFdjGxpXAfsvbse9z3US8gLzBxlKVuhTwWFfhG7
-CijmEsbNkFEqYDpPYHawg3+2FUoremixa8FL4ObxXHa/Wi+y5v5xSoUHtcZfN1Ot
-8uYQBWkCgYEA+MpH4o5Ykv8/DOBxfM8i8mmKomKVTn+MasKL9JMu4NWaU9Pvdg+H
-BYMKtoIVy94SkO8ytrZeOI4roYLE6mFMi7PCZkf5VMkHaGoyU0tD5Ch6NQKPpuzF
-z0hz4Vnw6BnS9gqSdAkSNCp6SNfomENWcRoVBsB0UiRHs0Wied5QXQ8CgYEAyEae
-OTu2WQMDbPiHxJm7Ot1PDBb3uAesYHTnRCGyOFKQA6VbEAtJuE/sa+/VrMTIbIRO
-8U0/5XOUaioy7a6f6CmCGcNA3Jt/NGGJfgbV0yFJn3pm6FpDCi93EvdEtBtw+dJw
-Ms2w3u2k/8Vm3tgQLdQ+HNfcHLa/FBiqrwIID6cCgYEAj5NFCuT1DtgIzeiU9d8g
-Ht9zpyTXX3bSVSYy2JE8A3qh1nC/h9WMKU0nmI3YAFAHTOcN0E3McDzzxwCNnWlL
-YG/750TwCdL92G843cLYyknlxMPWnRGVUntQjKN4GKoWifEt9ZLqk3pUGceoLn7l
-2t2fdscIGgNf8YBlNIlsvVcCgYAHEX76FCJuZ83SJb9c7/QMsszcZ18czqCF0vpq
-jCnnFPriNg7NtShH6gI1GQTYkSVltxG2MHzF01t0l8KuYtBf+D8QO7TpVE+cAKlC
-mmknh3A6wa4qGy1siZpRQArbtHA7UPMGx/2rEIYXRNdJnCSOCYSbrf6lwMljoy86
-9/5i1wKBgQCC2SrKuOTjrcgpmOVOTxchNc+3/JxmbYDUdjKSHrpYEcTFr0kuoUSv
-78QYEcuYK3c31tMY+pCw5p7dVIx0RkKltDiBhSWQojgUwaBg0xvuYs5MbLaJJd9F
-w1fb/xGWLXI1Vq/rJzwQ/nw0pba8tHZubbutpkQdXV4QRwbebY1Eag==
------END RSA PRIVATE KEY-----
-          port: 22
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}     # full PEM key with LF line endings
           script: |
             echo "Stopping old container (if exists)..."
             docker stop node_app || true
@@ -86,4 +64,4 @@ w1fb/xGWLXI1Vq/rJzwQ/nw0pba8tHZubbutpkQdXV4QRwbebY1Eag==
               -p 3000:3000 \
               --name node_app ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
 
-            echo "✅ Deployment completed successfully!"
+            echo "Deployment completed successfully!"

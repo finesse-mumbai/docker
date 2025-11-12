@@ -27,7 +27,7 @@ app.use(
 
 app.post("/api/users/register", userController.register);
 app.post("/api/users/login", userController.login);
-app.post("/api/users/getUser", userController.getUser);
+app.get("/api/users/getUser", userController.getUser);
 
 // ✅ For file upload
 app.post("/api/files", upload.single("file"), uploadController.upload);

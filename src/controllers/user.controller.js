@@ -36,21 +36,17 @@ const login = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
-    const { email } = req.query; // or req.params depending on your route
-
-    // Check if email provided
+    const { email } = req.query;
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
     }
-
-    // Find user by email
     const user = await prisma.User.findUnique({
       where: { email },
       select: {
         id: true,
         name: true,
         email: true,
-        createdAt: true, // optional — depends on your schema
+        createdAt: true, 
       },
     });
 

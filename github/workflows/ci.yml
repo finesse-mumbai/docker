@@ -3,7 +3,7 @@ name: 🚀 Deploy to Lightsail
 on:
   push:
     branches:
-      - main  # 👈 change this if your default branch is something else (like "master" or "production")
+      - master  # 👈 change this if your default branch is something else (like "master" or "production")
 
 jobs:
   build-and-deploy:

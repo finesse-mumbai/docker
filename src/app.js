@@ -24,7 +24,7 @@ app.use(
   })
 );
 
-// ✅ Routes (controllers used directly)
+
 app.post("/api/users/register", userController.register);
 app.post("/api/users/login", userController.login);
 app.post("/api/users/getUser", userController.getUser);

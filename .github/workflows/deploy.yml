@@ -4,21 +4,28 @@ on:
     branches:
       - main
       - master
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # 3️⃣ Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 4️⃣ Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -26,16 +33,28 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
 
+      # 5️⃣ Optional: debug SSH key format
+      - name: Debug SSH key format
+        run: echo "${LIGHTSAIL_SSH_KEY}" | head -n 5
+        env:
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+      # 6️⃣ Deploy via SSH to Lightsail
       - name: Deploy to Lightsail via SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          host: ${{ secrets.LIGHTSAIL_HOST }}       # Public IPv4
+          username: ${{ secrets.LIGHTSAIL_USER }}   # usually 'ubuntu'
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}     # full PEM key with LF line endings
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
+            echo "Stopping old container (if exists)..."
             docker stop node_app || true
             docker rm node_app || true
+
+            echo "Pulling latest image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
+
+            echo "Starting new container..."
             docker run -d --restart=always \
               -e NODE_ENV=production \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
@@ -44,3 +63,5 @@ jobs:
               -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
               -p 3000:3000 \
               --name node_app ${{ secrets.DOCKERHUB_USERNAME }}/myapp:${{ github.sha }}
+
+            echo "Deployment completed successfully!"

@@ -40,7 +40,8 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}       # Public IPv4 of Lightsail
           username: ${{ secrets.LIGHTSAIL_USER }}   # usually 'ubuntu'
           key: |
-            MIIEpAIBAAKCAQEAwqKpPR6XyT2KEA5Qsq/4YcVjxK81DbRID+joc3fAOciClJYV
+            -----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAwqKpPR6XyT2KEA5Qsq/4YcVjxK81DbRID+joc3fAOciClJYV
 +udslacz5LRCMtgUX7/XvpThDem62U2eYn9oQhc0iUT2xhSGaRTLmRpJvVo+M6ks
 3B2vRpYzuMEXcidz4oDA2G4reAq+Alm3+vvcmtA76Zm0AQRXuN+bSyEFLzyrwZHk
 Dvxs7aWhRX3RlS/iYqOnJubKZZ5pieXl1XAb18rW8MISRO/hbEFpysv69emWS2Py
@@ -65,6 +66,7 @@ mmknh3A6wa4qGy1siZpRQArbtHA7UPMGx/2rEIYXRNdJnCSOCYSbrf6lwMljoy86
 9/5i1wKBgQCC2SrKuOTjrcgpmOVOTxchNc+3/JxmbYDUdjKSHrpYEcTFr0kuoUSv
 78QYEcuYK3c31tMY+pCw5p7dVIx0RkKltDiBhSWQojgUwaBg0xvuYs5MbLaJJd9F
 w1fb/xGWLXI1Vq/rJzwQ/nw0pba8tHZubbutpkQdXV4QRwbebY1Eag==
+-----END RSA PRIVATE KEY-----
           port: 22
           script: |
             echo "Stopping old container (if exists)..."
